@@ -1,0 +1,45 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Subscription {
+  id              String       @id @default(cuid())
+  name            String
+  amount          Int
+  billingCycle    BillingCycle
+  category        Category
+  nextBillingDate DateTime     @db.Date
+  url             String?
+  note            String?
+  isActive        Boolean      @default(true)
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([category])
+  @@index([isActive])
+  @@map("subscriptions")
+}
+
+enum BillingCycle {
+  MONTHLY
+  YEARLY
+}
+
+enum Category {
+  ENTERTAINMENT
+  MUSIC
+  VIDEO
+  PRODUCTIVITY
+  CLOUD_STORAGE
+  DEVELOPMENT
+  EDUCATION
+  NEWS
+  HEALTH
+  GAMING
+  OTHER
+}
