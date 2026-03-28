@@ -62,6 +62,8 @@ export default function DashboardPage() {
             title="登録数"
             amount={summary?.activeCount ?? 0}
             description="有効なサブスクリプション数"
+            isCurrency={false}
+            suffix="件"
           />
         </div>
       )}

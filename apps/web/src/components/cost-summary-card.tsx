@@ -7,9 +7,11 @@ interface Props {
   title: string;
   amount: number;
   description?: string;
+  isCurrency?: boolean;
+  suffix?: string;
 }
 
-export function CostSummaryCard({ title, amount, description }: Props) {
+export function CostSummaryCard({ title, amount, description, isCurrency = true, suffix }: Props) {
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -18,7 +20,9 @@ export function CostSummaryCard({ title, amount, description }: Props) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold">{formatCurrency(amount)}</div>
+        <div className="text-2xl font-bold">
+          {isCurrency ? formatCurrency(amount) : `${amount}${suffix ?? ""}`}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">{description}</p>
         )}
