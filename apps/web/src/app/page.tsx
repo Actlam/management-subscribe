@@ -23,20 +23,26 @@ const VERDICT_STYLES: Record<string, string> = {
 export default function DashboardPage() {
   const { data: summary, isLoading: summaryLoading } =
     useSubscriptionSummary();
-  const { data: subscriptions } = useSubscriptions();
+  const { data: subscriptions, isLoading: subscriptionsLoading } =
+    useSubscriptions();
   const { data: reviewData, isLoading: reviewLoading } = useServiceReview();
   const { data: simulationData, isLoading: simLoading } =
     useSavingsSimulation();
 
-  // 見直し推奨件数
-  const reviewCount =
-    reviewData?.filter((r) => r.verdict !== "維持").length ?? 0;
+  const summaryCardsLoading =
+    summaryLoading || subscriptionsLoading || reviewLoading || simLoading;
 
-  // 節約可能金額
+  // 見直し推奨のみ抽出
+  const reviewRecommendations =
+    reviewData?.filter((r) => r.verdict !== "維持") ?? [];
+
+  // 節約可能金額（simulationDataから取得し、reviewと整合性を保つ）
   const savingsTotal =
-    reviewData
-      ?.filter((r) => r.verdict !== "維持")
-      .reduce((sum, r) => sum + r.monthlyAmount, 0) ?? 0;
+    simulationData
+      ?.filter((s) =>
+        reviewRecommendations.some((r) => r.id === s.id)
+      )
+      .reduce((sum, s) => sum + s.monthlySaving, 0) ?? 0;
 
   // 日額計算
   const dailyCost = Math.round((summary?.monthlyTotal ?? 0) / 30);
@@ -71,7 +77,7 @@ export default function DashboardPage() {
       </div>
 
       {/* 4 Summary Cards */}
-      {summaryLoading ? (
+      {summaryCardsLoading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <LoadingCard key={i} />
@@ -110,7 +116,7 @@ export default function DashboardPage() {
                 見直し推奨
               </p>
               <p className="text-2xl font-semibold font-mono text-red-500 mt-2">
-                {reviewCount}件
+                {reviewRecommendations.length}件
               </p>
             </CardContent>
           </Card>
@@ -147,9 +153,9 @@ export default function DashboardPage() {
           <CardContent>
             {reviewLoading ? (
               <div className="animate-pulse h-40" />
-            ) : !reviewData || reviewData.length === 0 ? (
+            ) : reviewRecommendations.length === 0 ? (
               <p className="text-muted-foreground text-center py-8">
-                データがありません
+                見直し推奨のサービスはありません
               </p>
             ) : (
               <div>
@@ -162,7 +168,7 @@ export default function DashboardPage() {
                 </div>
                 {/* Table Body */}
                 <div className="divide-y">
-                  {reviewData.map((item) => (
+                  {reviewRecommendations.map((item) => (
                     <div
                       key={item.id}
                       className="flex items-center gap-2 py-2.5 text-sm"
@@ -179,13 +185,11 @@ export default function DashboardPage() {
                         </Badge>
                       </span>
                       <span className="w-20 text-right">
-                        {item.verdict !== "維持" && (
-                          <span
-                            className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${VERDICT_STYLES[item.verdict] ?? ""}`}
-                          >
-                            {item.verdict}
-                          </span>
-                        )}
+                        <span
+                          className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${VERDICT_STYLES[item.verdict] ?? ""}`}
+                        >
+                          {item.verdict}
+                        </span>
                       </span>
                     </div>
                   ))}

@@ -67,11 +67,12 @@ export function Sidebar() {
           const isActive =
             item.href === "/"
               ? pathname === "/"
-              : pathname.startsWith(item.href);
+              : pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-current={isActive ? "page" : undefined}
               className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm transition-colors ${
                 isActive
                   ? "bg-foreground/10 text-foreground font-medium"
