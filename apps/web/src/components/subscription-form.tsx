@@ -123,7 +123,9 @@ export function SubscriptionForm({
               onValueChange={(v) => { if (v) setValue("category", v as Category); }}
             >
               <SelectTrigger>
-                <SelectValue placeholder="カテゴリを選択" />
+                <SelectValue placeholder="カテゴリを選択">
+                  {CATEGORY_LABELS[watch("category")] ?? "カテゴリを選択"}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {(
